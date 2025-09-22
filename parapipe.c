@@ -32,6 +32,25 @@ int main(int argc, char *argv[]) {
         return 1;
   }
 
+// now this is for read input
+
+char *line = NULL;
+size_t cap = 0;
+ssize_t len;
+  int count = 0;
+char **all_lines = NULL;
+
+  while ((len = getline(&line, &cap, stdin)) != -1) {
+        all_lines = realloc(all_lines, sizeof(char*) * (count+1));
+        all_lines[count] = strdup(line);  // coping
+        count++;
+    }
+    free(line);
+
+    printf("Read %d lines\n", count);
+
+//
+
  pthread_t workers[n];
  pthread_t receiv;
 
@@ -46,6 +65,13 @@ for (int i = 0; i < n; i++) {
  pthread_join(workers[i], NULL);
 }
 pthread_join(receiv, NULL);
+
+// free memory 
+  for (int i = 0; i < count; i++) {
+        free(all_lines[i]);
+       }
+
+ free(all_lines);
 
 return 0;
 
