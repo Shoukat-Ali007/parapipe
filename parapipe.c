@@ -72,6 +72,27 @@ int main(int argc, char *argv[]) {
         return 1;
   }
 
+//Split commands by '->'
+int cmd_count = 0;
+    char **commands = NULL;
+    char *token = strtok(cmd_str, "->");
+    while (token) {
+        while (*token == ' ') token++; // trim 
+        char *end = token + strlen(token) - 1;
+        while (end > token && *end == ' ') *end-- = '\0'; // trim
+
+        commands = realloc(commands, sizeof(char*) * (cmd_count + 1));
+        commands[cmd_count++] = strdup(token);
+
+        token = strtok(NULL, "->");
+    }
+
+    printf("Parsed %d commands:\n", cmd_count);
+    for (int i = 0; i < cmd_count; i++) {
+        printf("[%d]: %s\n", i, commands[i]);
+    }
+
+
 // now this is for read input
 
 char *line = NULL;
