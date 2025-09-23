@@ -94,14 +94,24 @@ for (int i = 0; i < pid_count; i++) {
         }
 
 
-  //Read output from last command 
+  //non blocking Read output from last command 
     if (last_output != -1) {
-       char buf[1024];
-       int n = read(last_output, buf, sizeof(buf)-1);
-       if (n > 0) {
-          buf[n] = '\0';
-           warg->results[l] = strdup(buf);
-          }
+     fcntl(last_output, F_SETFL, O_NONBLOCK);
+          char buf[1024];
+         int total = 0;
+         warg->results[l] = calloc(1, 1);
+
+           while (1) {
+              int n = read(last_output, buf, sizeof(buf) - 1);
+               if (n > 0) {
+                  buf[n] = '\0';
+                  total += n;
+                   warg->results[l] = realloc(warg->results[l], total + 1);
+                    strcat(warg->results[l], buf);
+               } else {
+                    break;
+                }
+            }
 
             close(last_output);
         }
