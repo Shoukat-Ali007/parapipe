@@ -2,9 +2,49 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 void *worker(void *arg) {
     printf("my Worker thread started\n");
+     
+int fd[2];
+    if (pipe(fd) == -1) {
+        perror("pipe");
+        return NULL;
+    }
+
+ pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork");
+        return NULL;
+    }
+if (pid == 0) {
+
+dup2(fd[1], STDOUT_FILENO);  
+        close(fd[0]);    
+        close(fd[1]);
+
+execlp("echo", "echo", "Hello from worker", NULL);
+
+perror("exec");
+        exit(1);
+
+} else{
+
+close(fd[1]);  
+        char buf[128];
+        int n = read(fd[0], buf, sizeof(buf)-1);
+        if (n > 0) {
+            buf[n] = '\0';
+            printf("Worker got: %s", buf);
+ }
+        close(fd[0]);
+        wait(NULL);  
+
+}
+
+
     return NULL;
 }
 
@@ -72,6 +112,10 @@ pthread_join(receiv, NULL);
        }
 
  free(all_lines);
+
+  printf("Threads: %d\n",n);
+  printf("Commands: %s\n",cmd_str);
+
 
 return 0;
 
